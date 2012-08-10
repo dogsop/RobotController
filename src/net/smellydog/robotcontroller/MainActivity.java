@@ -68,7 +68,7 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
         rightVSeekBar.setMax(100);
         rightVSeekBar.setProgress(50);
 
-        //
+        // DDDD
         new Discoverer((WifiManager) getSystemService(Context.WIFI_SERVICE), this).start();
         
     }
