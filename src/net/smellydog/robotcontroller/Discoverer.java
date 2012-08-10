@@ -35,7 +35,7 @@ import android.util.Log;
 public class Discoverer extends Thread {
   private static final String TAG = "Discovery";
   private static final String REMOTE_KEY = "b0xeeRem0tE!";
-  private static final int DISCOVERY_PORT = 2562;
+  private static final int DISCOVERY_PORT = 12233;
   private static final int TIMEOUT_MS = 500;
   private Receiver mReceiver;
 
