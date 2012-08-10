@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">RobotController</string>
+    <string name="hello_left">Hello Left!</string>
+    <string name="hello_right">Hello Right!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Robot Controller</string>
+
+</resources>
