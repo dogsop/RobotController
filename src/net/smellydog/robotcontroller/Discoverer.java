@@ -36,7 +36,7 @@ public class Discoverer extends Thread {
   private static final String TAG = "Discovery";
   private static final String REMOTE_KEY = "b0xeeRem0tE!";
   private static final int DISCOVERY_PORT = 12233;
-  private static final int TIMEOUT_MS = 500;
+  private static final int TIMEOUT_MS = 5000;
   private Receiver mReceiver;
 
   private InetAddress localAddress;
@@ -53,7 +53,7 @@ public class Discoverer extends Thread {
      * @param servers
      *          list of discovered servers, null on error
      */
-    void addAnnouncedServers(RobotServer server);
+    void foundRobot(RobotServer server);
   }
 
   Discoverer(WifiManager wifi, Receiver receiver) {
@@ -74,7 +74,7 @@ public class Discoverer extends Thread {
     } catch (IOException e) {
       Log.e(TAG, "Could not send discovery request", e);
     }
-    mReceiver.addAnnouncedServers(server);
+    mReceiver.foundRobot(server);
   }
 
   /**
@@ -84,10 +84,7 @@ public class Discoverer extends Thread {
    * @throws IOException
    */
   private void sendDiscoveryRequest(DatagramSocket socket) throws IOException {
-    String data = String
-        .format(
-            "<bdp1 cmd=\"discover\" application=\"iphone_remote\" challenge=\"%s\" signature=\"%s\"/>",
-            mChallenge, getSignature(mChallenge));
+    String data = "RobotController";
     Log.d(TAG, "Sending data " + data);
 
     DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length(),
@@ -146,7 +143,7 @@ public class Discoverer extends Thread {
             + (System.currentTimeMillis() - start) + " " + s);
         InetAddress address = ((InetSocketAddress) packet.getSocketAddress()).getAddress();
         if(address.toString().contentEquals(localAddress.toString()) == false) {
-            RobotServer server = new RobotServer(address);
+            RobotServer server = new RobotServer(address, s);
             if (server != null) {
                 return server;
             }
@@ -156,34 +153,6 @@ public class Discoverer extends Thread {
       Log.d(TAG, "Receive timed out");
     }
     return null;
-  }
-
-  /**
-   * Calculate the signature we need to send with the request. It is a string
-   * containing the hex md5sum of the challenge and REMOTE_KEY.
-   * 
-   * @return signature string
-   */
-  private String getSignature(String challenge) {
-    MessageDigest digest;
-    byte[] md5sum = null;
-    try {
-      digest = java.security.MessageDigest.getInstance("MD5");
-      digest.update(challenge.getBytes());
-      digest.update(REMOTE_KEY.getBytes());
-      md5sum = digest.digest();
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
-    }
-
-    StringBuffer hexString = new StringBuffer();
-    for (int k = 0; k < md5sum.length; ++k) {
-      String s = Integer.toHexString((int) md5sum[k] & 0xFF);
-      if (s.length() == 1)
-        hexString.append('0');
-      hexString.append(s);
-    }
-    return hexString.toString();
   }
 
   public static void main(String[] args) {
