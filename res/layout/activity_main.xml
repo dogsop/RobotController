@@ -4,36 +4,47 @@
     android:layout_height="match_parent"
     android:orientation="horizontal" >
 
-	<LinearLayout android:id="@+id/leftPanel" 
-	    android:layout_width="90dp" 
-	    android:layout_height="match_parent">
-	
-	<net.smellydog.robotcontroller.VerticalSeekBar
-		android:progressDrawable="@drawable/progress_vertical"
-	    android:layout_height="fill_parent" 
-	    android:id="@+id/leftSeekBar" 
-	    android:thumb="@drawable/seek_thumb_wide" 
-	    android:layout_width="75dip"/>
-	
-	</LinearLayout>
-    
-	<WebView
-	    android:id="@+id/webview"
-	    android:layout_width="800dp"
-	    android:layout_height="480dp"
-	/>
-	
-	<LinearLayout android:id="@+id/rightPanel" 
-	    android:layout_width="90dp" 
-	    android:layout_height="match_parent">
-	
-	<net.smellydog.robotcontroller.VerticalSeekBar
-		android:progressDrawable="@drawable/progress_vertical"
-	    android:layout_height="fill_parent" 
-	    android:id="@+id/rightSeekBar" 
-	    android:thumb="@drawable/seek_thumb_wide" 
-	    android:layout_width="75dip"/>
-	
-	</LinearLayout>
-    
+    <LinearLayout
+        android:id="@+id/leftPanel"
+        android:layout_width="90dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_weight="1" >
+
+        <net.smellydog.robotcontroller.VerticalSeekBar
+            android:id="@+id/leftSeekBar"
+            android:layout_width="75dip"
+            android:layout_height="fill_parent"
+            android:progressDrawable="@drawable/progress_vertical"
+            android:thumb="@drawable/seek_thumb_wide" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/centerPanel"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_weight="20" >
+
+        <WebView
+            android:id="@+id/webview"
+            android:layout_width="640dp"
+            android:layout_height="450dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rightPanel"
+        android:layout_width="90dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_weight="1" >
+
+        <net.smellydog.robotcontroller.VerticalSeekBar
+            android:id="@+id/rightSeekBar"
+            android:layout_width="75dip"
+            android:layout_height="fill_parent"
+            android:progressDrawable="@drawable/progress_vertical"
+            android:thumb="@drawable/seek_thumb_wide" />
+    </LinearLayout>
+
 </LinearLayout>

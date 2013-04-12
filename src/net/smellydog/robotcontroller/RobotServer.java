@@ -20,8 +20,7 @@ public class RobotServer {
 	  public RobotServer(InetAddress address, String data) {
 	    mAddr = address;
 	    
-	    String[] stringArray;
-	    stringArray = data.split("|");
+	    String[] stringArray = data.split(":");
 	    
 		for (int count = 0; count < stringArray.length; count++) {
 			if (stringArray[count].startsWith("ServerSocket") == true) {

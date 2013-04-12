@@ -11,6 +11,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 public class MainActivity extends Activity  implements Discoverer.Receiver {
@@ -112,8 +113,18 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
 					robotServer = server;
 			        //url = "http://10.20.20.10:5000/?action=snapshot";
 					if(robotServer.camSocketPort() > 0) {
-						url = String.format("http://%s:5000/?action=snapshot", robotServer.address().getHostAddress());
-				        webView.loadUrl(url);
+						//url = String.format("http://%s:5000/?action=snapshot", robotServer.address().getHostAddress());
+						//http://10.20.20.5:8888/stream.html
+						//url = String.format("http://%s:8888/stream.html", robotServer.address().getHostAddress());
+						url = String.format(
+								"http://%s:%d/javascript_simple.html",
+								robotServer.address().getHostAddress(),
+								robotServer.camSocketPort());
+						//webView.setVerticalScrollBarEnabled(false);
+						//webView.setHorizontalScrollBarEnabled(false);
+						WebSettings webSettings = webView.getSettings();
+						webSettings.setJavaScriptEnabled(true);
+						webView.loadUrl(url);
 					}
 				} else {
 			        //url = "http://10.20.20.10:5000/?action=snapshot";
@@ -163,21 +174,21 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
     
 	// refresh timer//////////////-----------------
 	public void timerSetup() {
-		autoUpdate = new Timer();
-		autoUpdate.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						// Actions goes here
-						if (url != null) {
-							webView.loadUrl(url);
-						}
-					}
-				});
-			}
-		}, 0, 2000);// refresh rate time interval (ms)
+//		autoUpdate = new Timer();
+//		autoUpdate.schedule(new TimerTask() {
+//			@Override
+//			public void run() {
+//				runOnUiThread(new Runnable() {
+//					@Override
+//					public void run() {
+//						// Actions goes here
+//						if (url != null) {
+//							webView.loadUrl(url);
+//						}
+//					}
+//				});
+//			}
+//		}, 0, 2000);// refresh rate time interval (ms)
 
 		updateSpeed = new Timer();
 		updateSpeed.schedule(new TimerTask() {
