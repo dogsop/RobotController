@@ -61,21 +61,30 @@ public class Discoverer extends Thread {
     mReceiver = receiver;
   }
 
-  public void run() {
-    RobotServer server = null;
-    try {
-      DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT);
-      socket.setBroadcast(true);
-      socket.setSoTimeout(TIMEOUT_MS);
+	public void run() {
+		RobotServer server = null;
+		try {
+			DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT);
+			socket.setBroadcast(true);
+			socket.setSoTimeout(TIMEOUT_MS);
 
-      sendDiscoveryRequest(socket);
-      server = listenForResponses(socket);
-      socket.close();
-    } catch (IOException e) {
-      Log.e(TAG, "Could not send discovery request", e);
-    }
-    mReceiver.foundRobot(server);
-  }
+			sendDiscoveryRequest(socket);
+			server = listenForResponses(socket);
+			server.openSocket();
+			socket.close();
+		} catch (IOException e) {
+			Log.e(TAG, "Could not send discovery request", e);
+		}
+		if (server != null) {
+			Log.i(TAG, "returning server");
+			// if(server.openSocket() == true) {
+			// mReceiver.foundRobot(server);
+			// }
+		} else {
+			Log.i(TAG, "server == null");
+		}
+		mReceiver.foundRobot(server);
+	}
 
   /**
    * Send a broadcast UDP packet containing a request for boxee services to

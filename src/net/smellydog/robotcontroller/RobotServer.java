@@ -1,6 +1,13 @@
 package net.smellydog.robotcontroller;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import android.util.Log;
 
@@ -14,6 +21,13 @@ public class RobotServer {
 	  private InetAddress mAddr;
 	  private int mTcpSocketPort = BAD_PORT;
 	  private int mCamSocketPort = BAD_PORT;
+	  
+	  private Socket socket;
+	  private BufferedWriter socketOut;
+	  private BufferedReader socketIn;
+	  
+	  private boolean isConnected = false;
+	  
 
 	  static public final int BAD_PORT = -1;
 	  
@@ -45,6 +59,46 @@ public class RobotServer {
 		}
 	  }
 
+	  public boolean openSocket() {
+			if(mTcpSocketPort > 0) {
+	            Log.d(TAG, "TCP Client Connecting...");
+	            
+	            //create a socket to make the connection with the server
+	            try {
+					socket = new Socket(mAddr.getHostAddress(), mTcpSocketPort);
+		            Log.d(TAG, "Socket connected");
+	                socketOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+	                socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	                isConnected = true;
+	                return true;
+				} catch (UnknownHostException e) {
+		            Log.e(TAG, e.toString());
+		            return false;
+				} catch (IOException e) {
+		            Log.e(TAG, e.toString());
+		            return false;
+				}
+			}
+			return false;
+	  }
+	  
+	public boolean sendSpeed(int leftMotorSpeed, int rightMotorSpeed) {
+		String msg = String.format("<%d:%d>", leftMotorSpeed, rightMotorSpeed);
+        Log.d(TAG, msg);
+		try {
+			socketOut.write(msg);
+			socketOut.flush();
+		} catch (IOException e) {
+            Log.e(TAG, e.toString());
+			return false;
+		}
+		return true;
+	}
+	  
+	public boolean isConnected() {
+		return isConnected;
+	}
+	
 	  public boolean valid() {
 	    return mTcpSocketPort != BAD_PORT && mAddr != null;
 	  }

@@ -1,5 +1,13 @@
 package net.smellydog.robotcontroller;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,7 +38,8 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
 	int currentLeftMotorSpeed = -1;
 	int currentRightMotorSpeed = -1;
 
-	RobotServer robotServer;
+	RobotServer robotServer = null;
+    
 	
     @SuppressLint("SetJavaScriptEnabled")
 	@Override
@@ -42,7 +51,15 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
         //myWebView.getSettings().setPluginState(WebSettings.PluginState);
         //myWebView.getSettings().set
 
-		webView.loadData("Scanning for robot", "text/html; charset=UTF-8", null);
+        //String summary = "<html><body>Scanning for <b>robot</b>.</body></html>";
+        String text = "<html><head>"
+                + "<style type=\"text/css\">body{color: #000; background-color: #fff; text-align: center; vertical-align: middle;}"
+                + "</style></head>"
+                + "<body>"                          
+                + "Scanning for robot." 
+                + "</body></html>";			        
+		Log.i(TAG, text);
+		webView.loadDataWithBaseURL("", text, "text/html", "utf-8", null);
         timerSetup();
         
         leftVSeekBar = (VerticalSeekBar)findViewById(R.id.leftSeekBar);
@@ -111,28 +128,39 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
 			public void run() {
 				if(server != null) {
 					robotServer = server;
+					//robotServer.openSocket();
 			        //url = "http://10.20.20.10:5000/?action=snapshot";
-					if(robotServer.camSocketPort() > 0) {
+					if(robotServer.camSocketPort() > 0) { 
 						//url = String.format("http://%s:5000/?action=snapshot", robotServer.address().getHostAddress());
 						//http://10.20.20.5:8888/stream.html
 						//url = String.format("http://%s:8888/stream.html", robotServer.address().getHostAddress());
+//						url = String.format(
+//								"http://%s:%d/javascript_simple.html",
+//								robotServer.address().getHostAddress(),
+//								robotServer.camSocketPort());
 						url = String.format(
-								"http://%s:%d/javascript_simple.html",
+								"http://%s:%d/stream_simple.html",
 								robotServer.address().getHostAddress(),
 								robotServer.camSocketPort());
-						//webView.setVerticalScrollBarEnabled(false);
-						//webView.setHorizontalScrollBarEnabled(false);
-						WebSettings webSettings = webView.getSettings();
-						webSettings.setJavaScriptEnabled(true);
 						webView.loadUrl(url);
 					}
+					
 				} else {
 			        //url = "http://10.20.20.10:5000/?action=snapshot";
 			        //webView.loadUrl(url);
-					webView.loadData("Robot not found", "text/html; charset=UTF-8", null);
+			        //String summary = "<html><body>Robot not found.</body></html>";
+			        String text = "<html><head>"
+			                + "<style type=\"text/css\">body{color: #000; background-color: #fff; text-align: center; vertical-align: middle;}"
+			                + "</style></head>"
+			                + "<body>"                          
+			                + "Robot not found."
+			                + "</body></html>";			        
+	    			Log.i(TAG, text);
+					webView.loadDataWithBaseURL("", text, "text/html", "utf-8", null);
 				}
 			}
 		});
+
 	}
 
     public void releaseLeftSeekBar() {
@@ -174,42 +202,37 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
     
 	// refresh timer//////////////-----------------
 	public void timerSetup() {
-//		autoUpdate = new Timer();
-//		autoUpdate.schedule(new TimerTask() {
-//			@Override
-//			public void run() {
-//				runOnUiThread(new Runnable() {
-//					@Override
-//					public void run() {
-//						// Actions goes here
-//						if (url != null) {
-//							webView.loadUrl(url);
-//						}
-//					}
-//				});
-//			}
-//		}, 0, 2000);// refresh rate time interval (ms)
-
 		updateSpeed = new Timer();
 		updateSpeed.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						// Actions goes here
-						if(leftMotorSpeed != currentLeftMotorSpeed) {
-							Log.v(TAG, "Updating left motor speed");
-							currentLeftMotorSpeed = leftMotorSpeed;
-					    	Log.v(TAG, "leftMotorSpeed " + String.valueOf(currentLeftMotorSpeed));
-						}
-						if(rightMotorSpeed != currentRightMotorSpeed) {
-							Log.v(TAG, "Updating right motor speed");
-							currentRightMotorSpeed = rightMotorSpeed;
-					    	Log.v(TAG, "rightMotorSpeed " + String.valueOf(currentRightMotorSpeed));
-						}
+				//Log.d(TAG, "timer.run");
+				if(robotServer != null 
+						&& robotServer.isConnected() == true) {
+					boolean updateRobot = false;
+					// Actions goes here
+					if(leftMotorSpeed != currentLeftMotorSpeed) {
+						Log.v(TAG, "Updating left motor speed");
+						currentLeftMotorSpeed = leftMotorSpeed;
+						updateRobot = true;
+				    	Log.v(TAG, "leftMotorSpeed " + String.valueOf(currentLeftMotorSpeed));
 					}
-				});
+					if(rightMotorSpeed != currentRightMotorSpeed) {
+						Log.v(TAG, "Updating right motor speed");
+						currentRightMotorSpeed = rightMotorSpeed;
+						updateRobot = true;
+				    	Log.v(TAG, "rightMotorSpeed " + String.valueOf(currentRightMotorSpeed));
+					}
+					if(updateRobot == true) {
+						robotServer.sendSpeed(currentLeftMotorSpeed, currentRightMotorSpeed);
+					}
+				} else {
+					if(robotServer == null) {
+						Log.d(TAG, "robotServer == null");
+					} else {
+						Log.d(TAG, "robotServer.isConnected() == false");
+					}
+				}
 			}
 		}, 0, 250);// refresh rate time interval (ms)
 	}
