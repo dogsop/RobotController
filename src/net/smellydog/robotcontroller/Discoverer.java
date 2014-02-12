@@ -80,6 +80,7 @@ public class Discoverer extends Thread {
 			// if(server.openSocket() == true) {
 			// mReceiver.foundRobot(server);
 			// }
+			
 		} else {
 			Log.i(TAG, "server == null");
 		}
