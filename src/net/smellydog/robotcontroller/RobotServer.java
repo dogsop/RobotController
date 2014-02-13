@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import android.util.Log;
@@ -24,10 +25,8 @@ public class RobotServer {
 	  private int mUdpCommandPort = BAD_PORT;
 	  private int mCamSocketPort = BAD_PORT;
 	  
-	  private DatagramSocket socket;
-	  private BufferedWriter socketOut;
-	  private BufferedReader socketIn;
-	  
+	  private DatagramSocket socket = null;
+
 
 	  static public final int BAD_PORT = -1;
 	  
@@ -35,33 +34,43 @@ public class RobotServer {
 	    mAddr = address;
 	    mUdpCommandPort = commandPort;
 	    mCamSocketPort = camPort;
+	    
+        try {
+			socket = new DatagramSocket();
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
 	  }
 
 	public boolean sendSpeed(int leftMotorSpeed, int rightMotorSpeed) {
 		
-		String msg = String.format("S:%d:%d>", leftMotorSpeed, rightMotorSpeed);
+		String msg = String.format("S:%d:%d", leftMotorSpeed, rightMotorSpeed);
         Log.d(TAG, msg);
         
         byte[] sendBuffer = msg.getBytes();
 
-        DatagramPacket packet = new DatagramPacket( sendBuffer, sendBuffer.length, mAddr, mUdpCommandPort );
-        //packet = new DatagramPacket( sendBuffer, sendBuffer.length, address, port );
+        if(socket != null) {
+            DatagramPacket packet = new DatagramPacket( sendBuffer, sendBuffer.length, mAddr, mUdpCommandPort );
+            //packet = new DatagramPacket( sendBuffer, sendBuffer.length, address, port );
 
-        try 
-        {
-            socket.send( packet );
-        } 
-        catch (IOException ioe) 
-        {
-            Log.d( "NETWORK", "Failed to send UDP packet due to IOException: " + ioe.getMessage() );
-            ioe.printStackTrace();
-    		return false;
-        }
-        catch( Exception e )
-        {
-            Log.d( "NETWORK", "Failed to send UDP packet due to Exeption: " + e.getMessage() );
-            e.printStackTrace();
-    		return false;
+            try 
+            {
+                socket.send( packet );
+            } 
+            catch (IOException ioe) 
+            {
+                Log.d( "NETWORK", "Failed to send UDP packet due to IOException: " + ioe.getMessage() );
+                ioe.printStackTrace();
+        		return false;
+            }
+            catch( Exception e )
+            {
+                Log.d( "NETWORK", "Failed to send UDP packet due to Exeption: " + e.getMessage() );
+                e.printStackTrace();
+        		return false;
+            }
         }
 		return true;
 	}
