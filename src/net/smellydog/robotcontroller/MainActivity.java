@@ -207,8 +207,7 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
 			@Override
 			public void run() {
 				//Log.d(TAG, "timer.run");
-				if(robotServer != null 
-						&& robotServer.isConnected() == true) {
+				if(robotServer != null) {
 					boolean updateRobot = false;
 					// Actions goes here
 					if(leftMotorSpeed != currentLeftMotorSpeed) {
