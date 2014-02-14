@@ -60,6 +60,7 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
                 + "</body></html>";			        
 		Log.i(TAG, text);
 		webView.loadDataWithBaseURL("", text, "text/html", "utf-8", null);
+		webView.reload();
         timerSetup();
         
         leftVSeekBar = (VerticalSeekBar)findViewById(R.id.leftSeekBar);
@@ -128,18 +129,9 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
 			public void run() {
 				if(server != null) {
 					robotServer = server;
-					//robotServer.openSocket();
-			        //url = "http://10.20.20.10:5000/?action=snapshot";
 					if(robotServer.camSocketPort() > 0) { 
-						//url = String.format("http://%s:5000/?action=snapshot", robotServer.address().getHostAddress());
-						//http://10.20.20.5:8888/stream.html
-						//url = String.format("http://%s:8888/stream.html", robotServer.address().getHostAddress());
-//						url = String.format(
-//								"http://%s:%d/javascript_simple.html",
-//								robotServer.address().getHostAddress(),
-//								robotServer.camSocketPort());
 						url = String.format(
-								"http://%s:%d/stream_simple.html",
+								"http://%s:%d/javascript_simple.html",
 								robotServer.address().getHostAddress(),
 								robotServer.camSocketPort());
 						webView.loadUrl(url);
