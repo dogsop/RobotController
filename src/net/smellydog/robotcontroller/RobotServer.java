@@ -12,6 +12,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.util.Log;
 
 
@@ -44,39 +47,67 @@ public class RobotServer {
         
 	  }
 
-	public boolean sendSpeed(int leftMotorSpeed, int rightMotorSpeed) {
-		
-		String msg = String.format("S:%d:%d", leftMotorSpeed, rightMotorSpeed);
-        Log.d(TAG, msg);
-        
-        byte[] sendBuffer = msg.getBytes();
+	public boolean sendDisplayMsg(String displayMsg) {
 
-        if(socket != null) {
-            DatagramPacket packet = new DatagramPacket( sendBuffer, sendBuffer.length, mAddr, mUdpCommandPort );
-            //packet = new DatagramPacket( sendBuffer, sendBuffer.length, address, port );
+		JSONObject object = new JSONObject();
+		try {
+			object.put("cmd", "displayMsg");
+			object.put("msg", displayMsg);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 
-            try 
-            {
-                socket.send( packet );
-            } 
-            catch (IOException ioe) 
-            {
-                Log.d( "NETWORK", "Failed to send UDP packet due to IOException: " + ioe.getMessage() );
-                ioe.printStackTrace();
-        		return false;
-            }
-            catch( Exception e )
-            {
-                Log.d( "NETWORK", "Failed to send UDP packet due to Exeption: " + e.getMessage() );
-                e.printStackTrace();
-        		return false;
-            }
-        }
-		return true;
+		String msg = object.toString();
+		return sendString(msg);
 	}
-	  
+		
+	public boolean sendSpeed(int leftMotorSpeed, int rightMotorSpeed) {
+
+		JSONObject object = new JSONObject();
+		try {
+			object.put("cmd", "setSpeed");
+			object.put("leftSpeed", leftMotorSpeed);
+			object.put("rightSpeed", rightMotorSpeed);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		String msg = object.toString();
+		return sendString(msg);
+	}	  
 	
-	  public boolean valid() {
+	public boolean sendString(String msg) {
+
+		Log.d(TAG, msg);
+
+		byte[] sendBuffer = msg.getBytes();
+
+		if (socket != null) {
+			DatagramPacket packet = new DatagramPacket(sendBuffer,
+					sendBuffer.length, mAddr, mUdpCommandPort);
+			// packet = new DatagramPacket( sendBuffer, sendBuffer.length,
+			// address, port );
+
+			try {
+				socket.send(packet);
+			} catch (IOException ioe) {
+				Log.d("NETWORK",
+						"Failed to send UDP packet due to IOException: "
+								+ ioe.getMessage());
+				ioe.printStackTrace();
+				return false;
+			} catch (Exception e) {
+				Log.d("NETWORK", "Failed to send UDP packet due to Exeption: "
+						+ e.getMessage());
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+	}	  
+	
+
+	public boolean valid() {
 	    return mUdpCommandPort != BAD_PORT && mAddr != null;
 	  }
 

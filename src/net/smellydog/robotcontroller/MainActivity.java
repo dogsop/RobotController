@@ -136,7 +136,7 @@ public class MainActivity extends Activity  implements Discoverer.Receiver {
 								robotServer.camSocketPort());
 						webView.loadUrl(url);
 					}
-					
+					robotServer.sendDisplayMsg("Connected");
 				} else {
 			        //url = "http://10.20.20.10:5000/?action=snapshot";
 			        //webView.loadUrl(url);
