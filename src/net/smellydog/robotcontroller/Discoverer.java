@@ -37,99 +37,101 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 /**
- * Code for dealing with Boxee server discovery. 
- * This class tries to send a broadcast UDP packet over your wifi network to
- * discover the boxee service.
+ * Code for dealing with Boxee server discovery. This class tries to send a
+ * broadcast UDP packet over your wifi network to discover the boxee service.
  */
 
 public class Discoverer extends Thread {
-  private static final String TAG = "Discovery";
-  private static final String REMOTE_KEY = "b0xeeRem0tE!";
-  private static final int DISCOVERY_PORT = 12233;
-  private static final int TIMEOUT_MS = 5000;
-  private Receiver mReceiver;
+	private static final String TAG = "Discovery";
+	private static final String REMOTE_KEY = "b0xeeRem0tE!";
+	private static final int DISCOVERY_PORT = 12233;
+	private static final int TIMEOUT_MS = 5000;
+	private Receiver mReceiver;
 
-  private InetAddress localAddress;
-  
-  // TODO: Vary the challenge, or it's not much of a challenge :)
-  private static final String mChallenge = "myvoice";
-  private WifiManager mWifi;
+	private InetAddress localAddress;
 
-  interface Receiver {
-    /**
-     * Process the list of discovered servers. This is always called once after
-     * a short timeout.
-     * 
-     * @param servers
-     *          list of discovered servers, null on error
-     */
-    void foundRobot(RobotServer server);
-  }
+	// TODO: Vary the challenge, or it's not much of a challenge :)
+	private static final String mChallenge = "myvoice";
+	private WifiManager mWifi;
 
-  Discoverer(WifiManager wifi, Receiver receiver) {
-    mWifi = wifi;
-    mReceiver = receiver;
-  }
+	interface Receiver {
+		/**
+		 * Process the list of discovered servers. This is always called once
+		 * after a short timeout.
+		 * 
+		 * @param servers
+		 *            list of discovered servers, null on error
+		 */
+		void foundRobot(RobotServer server);
+	}
+
+	Discoverer(WifiManager wifi, Receiver receiver) {
+		mWifi = wifi;
+		mReceiver = receiver;
+	}
 
 	public void run() {
 		RobotServer server = null;
-		
-	    HttpClient client = new DefaultHttpClient();
-	    HttpGet request = new HttpGet("https://gateway.smellydog.net/robot");
-	    HttpResponse response;
-	    String resultString = null;
-	    try {
-	        response = client.execute(request);
-	        
-	        // CONVERT RESPONSE TO STRING
-            resultString = EntityUtils.toString(response.getEntity());
-	        
-            JSONObject jObject = null;
-            try {
-            jObject = new JSONObject(resultString);
-            } catch (JSONException e) {
-             e.printStackTrace();
-             return;
-            }      
-            
-            String iNetAddressString = null;
-            int controlPort = -1;
-            int webPort = -1;
-            
+
+		HttpClient client = new DefaultHttpClient();
+		HttpGet request = new HttpGet("https://gateway.smellydog.net/robot");
+		HttpResponse response;
+		String resultString = null;
+		try {
+			response = client.execute(request);
+
+			// CONVERT RESPONSE TO STRING
+			resultString = EntityUtils.toString(response.getEntity());
+
+			JSONObject jObject = null;
+			try {
+				jObject = new JSONObject(resultString);
+			} catch (JSONException e) {
+				Log.e(TAG, "Error", e);
+				return;
+			}
+
+			String iNetAddressString = null;
+			int controlPort = -1;
+			int webPort = -1;
+
 			try {
 				iNetAddressString = jObject.getString("robotIpAddress");
-	            controlPort = jObject.getInt("robotControlPort");
-	            webPort = jObject.getInt("robotWebPort");
+				controlPort = jObject.getInt("robotControlPort");
+				webPort = jObject.getInt("robotWebPort");
+
+				InetAddress inetAddress = InetAddress
+						.getByName(iNetAddressString);
+				server = new RobotServer(inetAddress, webPort, controlPort);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.e(TAG, "Error", e);
+				return;
 			}
-            
-            InetAddress inetAddress = InetAddress.getByName(iNetAddressString);
-            server = new RobotServer(inetAddress, webPort, controlPort);
-	    } catch (ClientProtocolException e1) {
-	        // TODO Auto-generated catch block
-	        e1.printStackTrace();
-	    } catch (IOException e1) {
-	        // TODO Auto-generated catch block
-	        e1.printStackTrace();
-	    }
-	    
-		if (server != null) {
-			Log.i(TAG, "returning server");
-			// if(server.openSocket() == true) {
-			// mReceiver.foundRobot(server);
-			// }
-			
-		} else {
-			Log.i(TAG, "server == null");
+
+		} catch (ClientProtocolException e1) {
+			Log.e(TAG, "Error", e1);
+			return;
+		} catch (IOException e1) {
+			Log.e(TAG, "Error", e1);
+			return;
+		} finally {
+			if (server != null) {
+				Log.i(TAG, "returning server");
+				// if(server.openSocket() == true) {
+				// mReceiver.foundRobot(server);
+				// }
+
+			} else {
+				Log.i(TAG, "server == null");
+			}
+			mReceiver.foundRobot(server);
 		}
-		mReceiver.foundRobot(server);
 	}
 
-  public static void main(String[] args) {
-    new Discoverer(null, null).start();
-    while (true) {
-    }
-  }
+	public static void main(String[] args) {
+		new Discoverer(null, null).start();
+		while (true) {
+		}
+	}
 }

@@ -40,9 +40,9 @@ public class RobotServer {
 	    
         try {
 			socket = new DatagramSocket();
-		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (SocketException e) {
+			Log.e(TAG, "Error", e);
+			socket = null;
 		}
         
 	  }
