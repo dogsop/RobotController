@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
                 + "<style type=\"text/css\">body{color: #000; background-color: #fff; text-align: center; vertical-align: middle;}"
                 + "</style></head>"
                 + "<body>"                          
-                + "Scanning for robot." 
+                + "<h1>Scanning for robot.</h1>" 
                 + "</body></html>";			        
 		Log.i(TAG, text);
 		
