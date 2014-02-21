@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
 			}
 			
 			HttpClient client = new DefaultHttpClient();
-			HttpGet request = new HttpGet("https://gateway.smellydog.net/robot");
+			HttpGet request = new HttpGet("http://gateway.smellydog.net:8080/robot");
 			HttpResponse response;
 			String resultString = null;
 			try {
