@@ -1,16 +1,10 @@
 package net.smellydog.robotcontroller;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +41,34 @@ public class RobotServer {
         
 	  }
 
+	public boolean sendShutdownMsg() {
+
+		JSONObject object = new JSONObject();
+		try {
+			object.put("cmd", "shutdownMsg");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		String msg = object.toString();
+		return sendString(msg);
+	}
+			
+	  
+	public boolean sendSetBrightness(String brightnessSetting) {
+
+		JSONObject object = new JSONObject();
+		try {
+			object.put("cmd", "setBrightness");
+			object.put("brightness", brightnessSetting);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		String msg = object.toString();
+		return sendString(msg);
+	}
+			
 	public boolean sendDisplayMsg(String displayMsg) {
 
 		JSONObject object = new JSONObject();
@@ -68,6 +90,20 @@ public class RobotServer {
 			object.put("cmd", "setSpeed");
 			object.put("leftSpeed", leftMotorSpeed);
 			object.put("rightSpeed", rightMotorSpeed);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		String msg = object.toString();
+		return sendString(msg);
+	}	  
+	
+	public boolean sendBrightness(int brightnessLevel) {
+
+		JSONObject object = new JSONObject();
+		try {
+			object.put("cmd", "setBrightness");
+			object.put("level", brightnessLevel);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

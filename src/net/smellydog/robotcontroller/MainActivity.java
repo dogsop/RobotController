@@ -1,11 +1,12 @@
 package net.smellydog.robotcontroller;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import net.smellydog.robotcontroller.EditBrightnessDialog.EditBrightnessDialogListener;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -18,13 +19,16 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.WebView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements EditBrightnessDialogListener {
 	private static final String TAG = "MainActivity";
 	
 	public WebView webView;
@@ -127,6 +131,55 @@ public class MainActivity extends Activity {
         return true;
     }
     
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+      switch (item.getItemId()) {
+      // action with ID action_refresh was selected
+      case R.id.brightness_item:
+        Toast.makeText(this, "Brightness selected", Toast.LENGTH_SHORT)
+            .show();
+        showEditBrightnessDialog();
+        break;
+      // action with ID action_settings was selected
+      case R.id.shutdown_item:
+        Toast.makeText(this, "Shutdown selected", Toast.LENGTH_SHORT)
+            .show();
+        if(robotServer != null) {
+			Log.d(TAG, "sending Shutdown");
+			Runnable runnable = new Runnable() {
+				public void run() {
+					robotServer.sendShutdownMsg();
+				}
+			};
+			Thread mythread = new Thread(runnable);
+			mythread.start();
+        }
+        break;
+      default:
+        break;
+      }
+
+      return true;
+    } 
+    
+    void showEditBrightnessDialog() {
+        FragmentManager fm = getFragmentManager();
+        EditBrightnessDialog editBrightnessDialog = new EditBrightnessDialog();
+        editBrightnessDialog.show(fm, "fragment_edit_name");
+    }
+    
+    @Override
+    public void onFinishEditDialog(final String inputText) {
+		Log.d(TAG, "sending setBrightness");
+		Runnable runnable = new Runnable() {
+			public void run() {
+				robotServer.sendSetBrightness(inputText);
+			}
+		};
+		Thread mythread = new Thread(runnable);
+		mythread.start();
+    }
+    
     public void releaseLeftSeekBar() {
         leftVSeekBar.setProgress(50);
         //updateLeftMotorSlider(0);
@@ -208,7 +261,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "doInBackground called");
 
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "Error", e);
 			}
